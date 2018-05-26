@@ -52,9 +52,9 @@ Switch: 'switch';
 
 Case: 'case';
 
-HexNum: '0x' Delim* HexDigit+;
-
 Num: Digit+;
+
+HexNum: '0x'HexDigit+;
 
 BoolLit: 'true' | 'false';
 
