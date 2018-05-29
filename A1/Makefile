@@ -18,7 +18,7 @@ CLASSES = *.class
 default:init $(CLASSES)
 
 init:
-	$(ANLTR) A1_Lexer.g4
+	$(ANLTR) A1_lexer.g4
 
 # Compile
 $(CLASSES):
