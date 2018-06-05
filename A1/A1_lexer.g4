@@ -1,4 +1,4 @@
-lexer grammar A1_Lexer;
+lexer grammar A1_lexer;
 
 // Fragment definition
 
@@ -39,6 +39,8 @@ If: 'if';
 Else: 'else';
 
 For: 'for';
+
+While: 'while';
 
 Ret: 'return';
 
@@ -88,7 +90,6 @@ Colon: ':';
 
 Comma: ',';
 
-While: 'while';
 
 EqOp: '==' | '!=';
 
