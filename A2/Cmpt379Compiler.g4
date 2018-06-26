@@ -134,7 +134,7 @@ field_decl returns [int id]
 	$id = $f.id;
 	PrintEdge($f.id, PrintNode($Ident.text));
 }
-(OBracket int_literal CBracket
+('[' int_literal ']'
 {
     PrintEdge($f.id, PrintNode($int_literal.text));
 })?
@@ -144,7 +144,7 @@ field_decl returns [int id]
 	PrintEdge($id, PrintNode($Type.text));
 	PrintEdge($id, PrintNode($Ident.text));
 }
-( OBracket int_literal CBracket
+( '[' int_literal ']'
 {
     PrintEdge($id, PrintNode($int_literal.text));
 })?
@@ -318,10 +318,171 @@ statement returns [int id]
 	PrintEdge($id, PrintNode("-="));
 	PrintEdge($id, $expr.id);
 }
+| method_call ';'
+{
+    $id = $method_call.id;
+}
+| ext_method_call ';'
+{
+    $id = $ext_method_call.id;
+}
+| If '(' expr ')' b1=block Else b2=block
+{
+    $id = PrintNode("If_Else");
+    PrintEdge($id, $expr.id);
+    PrintEdge($id, $b1.id);
+    PrintEdge($id, $b2.id);
+}
+| If '(' expr ')' block
+{
+    $id = PrintNode("If");
+    PrintEdge($id, $expr.id);
+    PrintEdge($id, $block.id);
+}
+| Switch expr '{' case_seq '}'
+{
+    $id = PrintNode("Switch");
+    PrintEdge($id, $expr.id);
+    PrintEdge($id, $case_seq.id);
+}
+| While '(' expr ')' statement
+{
+    $id = PrintNode("While");
+    PrintEdge($id, $expr.id);
+    PrintEdge($id, $statement.id);
+}
+| Ret ';'
+{
+    $id = PrintNode("Ret");
+}
+| Ret expr ';'
+{
+    $id = PrintNode("Ret");
+    PrintEdge($id, $expr.id);
+}
+| Brk ';'
+{
+    $id = PrintNode("Brk");
+}
+| Cnt ';'
+{
+    $id = PrintNode("Cnt");
+}
 | block
 {
 	$id = $block.id;
 };
+
+case_seq returns [int id]
+: cases
+{
+    $id = PrintNode("CaseSeq");
+    PrintEdges($id, $cases.s);
+}
+;
+
+cases returns [MySet s]
+: c=cases case_sample
+{
+    $s = $c.s;
+    $s.ExtendArray($case_sample.id);
+}
+| case_sample
+{
+    $s = new MySet();
+    $s.ExtendArray($case_sample.id);
+}
+;
+
+case_sample returns [int id]
+: Case literal ':' statements
+{
+    $id = PrintNode("Case");
+    PrintEdge($id, PrintNode($literal.text));
+    PrintEdge($id, $statements.id);
+}
+|
+Case literal ':'
+{
+    $id = PrintNode("Case");
+    PrintEdge($id, PrintNode($literal.text));
+}
+;
+
+method_call returns [int id]
+: Ident '(' ')'
+{
+    $id = PrintNode("User_meth");
+    PrintEdge($id, PrintNode($Ident.text));
+}
+| Ident '(' expr_arg next_args ')'
+{
+    $id = PrintNode("User_meth");
+    PrintEdge($id, $expr_arg.id);
+    PrintEdges($id, $next_args.s);
+}
+;
+
+ext_method_call returns [int id]
+: Callout '(' str_arg ')'
+{
+    $id = PrintNode("Ext_meth");
+    PrintEdge($id, PrintNode("callout"));
+    PrintEdge($id, $str_arg.id);
+}
+| Callout '(' str_arg callout_args ')'
+{
+    $id = PrintNode("Ext_meth");
+    PrintEdge($id, PrintNode("callout"));
+    PrintEdge($id, $str_arg.id);
+    PrintEdges($id, $callout_args.s);
+}
+;
+callout_args returns [MySet s]
+: c=callout_args ',' expr_arg
+{
+    $s = $c.s;
+    int id = $expr_arg.id;
+    $s.ExtendArray(id);
+}
+| c=callout_args ',' str_arg
+{
+    $s = $c.s;
+    $s.ExtendArray($str_arg.id);
+}
+|
+{
+    $s = new MySet();
+}
+;
+
+str_arg returns [int id]
+: Str
+{
+    $id = PrintNode("string_arg");
+    PrintEdge($id, PrintNode(ProcessString($Str.text)));
+};
+
+next_args returns [MySet s]
+: e=next_args ',' expr_arg
+{
+    $s = $e.s;
+    int id = $expr_arg.id;
+    $s.ExtendArray(id);
+}
+|
+{
+    $s = new MySet();
+}
+;
+
+expr_arg returns [int id]
+: expr
+{
+    $id = PrintNode("Expr_arg");
+    PrintEdge($id, $expr.id);
+}
+;
 
 //<expr> -> <expr> <bin_op> <expr>
 //<expr> -> <location>
@@ -344,28 +505,25 @@ expr returns [int id]
 	$id = PrintNode("Loc_expr");
 	PrintEdge($id, $location.id);
 }
+| method_call
+{
+    $id = PrintNode("Call_expr");
+    PrintEdge($id, $method_call.id);
+}
 | '-' e3=expr
 {
     $id = PrintNode("Negative_expr");
-    int id2 = PrintNode("-");
-    PrintEdge($id, id2);
     PrintEdge($id, $e3.id);
 }
 | '!' e4=expr
 {
     $id = PrintNode("Not_expr");
-    int id2 = PrintNode("!");
-    PrintEdge($id, id2);
     PrintEdge($id, $e4.id);
 }
 | '(' e5=expr ')'
 {
     $id = PrintNode("Paren_expr");
-    int id2 = PrintNode("(");
-    int id3 = PrintNode(")");
-    PrintEdge($id, id2);
     PrintEdge($id, $e5.id);
-    PrintEdge($id, id3);
 }
 ;
 
