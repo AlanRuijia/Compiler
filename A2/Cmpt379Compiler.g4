@@ -487,18 +487,115 @@ expr_arg returns [int id]
 //<expr> -> <expr> <bin_op> <expr>
 //<expr> -> <location>
 //<expr> -> <literal>
+multiOp: '*' | '/' | '%';
+addOp: '+' | '-';
+
 expr returns [int id]
+: e1=expr '||' and_expr
+{
+	$id = PrintNode("Bin_expr");
+	PrintEdge($id, $e1.id);
+	PrintEdge($id, PrintNode("||"));
+	PrintEdge($id, $and_expr.id);
+}
+| and_expr
+{
+	$id = $and_expr.id;
+}
+;
+
+and_expr returns [int id]
+: e1=and_expr '&&' equal_expr
+{
+	$id = PrintNode("Bin_expr");
+	PrintEdge($id, $e1.id);
+	PrintEdge($id, PrintNode("&&"));
+	PrintEdge($id, $equal_expr.id);
+}
+| equal_expr
+{
+	$id = $equal_expr.id;
+}
+;
+
+equal_expr returns [int id]
+: e1=equal_expr EqOp rel_expr
+{
+	$id = PrintNode("Bin_expr");
+	PrintEdge($id, $e1.id);
+	PrintEdge($id, PrintNode($EqOp.text));
+	PrintEdge($id, $rel_expr.id);
+}
+| rel_expr
+{
+	$id = $rel_expr.id;
+}
+;
+
+rel_expr returns [int id]
+: e1=rel_expr Relop add_expr
+{
+	$id = PrintNode("Bin_expr");
+	PrintEdge($id, $e1.id);
+	PrintEdge($id, PrintNode($Relop.text));
+	PrintEdge($id, $add_expr.id);
+}
+| add_expr
+{
+	$id = $add_expr.id;
+}
+;
+
+add_expr returns [int id]
+: e1=add_expr addOp multi_expr
+{
+	$id = PrintNode("Bin_expr");
+	PrintEdge($id, $e1.id);
+	PrintEdge($id, PrintNode($addOp.text));
+	PrintEdge($id, $multi_expr.id);
+}
+| multi_expr
+{
+	$id = $multi_expr.id;
+}
+;
+
+multi_expr returns [int id]
+: e1=multi_expr multiOp not_expr
+{
+	$id = PrintNode("Bin_expr");
+	PrintEdge($id, $e1.id);
+	PrintEdge($id, PrintNode($multiOp.text));
+	PrintEdge($id, $not_expr.id);
+}
+| not_expr
+{
+	$id = $not_expr.id;
+}
+;
+
+not_expr returns [int id]
+: '-' e1=not_expr
+{
+	$id = PrintNode("Neg_expr");
+	PrintEdge($id, $e1.id);
+}
+| '!' e1=not_expr
+{
+	$id = PrintNode("Not_expr");
+	PrintEdge($id, $e1.id);
+}
+| literal_expr
+{
+	$id = $literal_expr.id;
+}
+;
+
+literal_expr returns [int id]
 : literal
 {
 	$id = PrintNode("Const_expr");
 	PrintEdge($id, PrintNode($literal.text));
-}
-| e1=expr binOp e2=expr
-{
-	$id = PrintNode("Bin_expr");
-	PrintEdge($id, $e1.id);
-	PrintEdge($id, PrintNode($binOp.text));
-	PrintEdge($id, $e2.id);
 }
 | location
 {
@@ -507,26 +604,14 @@ expr returns [int id]
 }
 | method_call
 {
-    $id = PrintNode("Call_expr");
-    PrintEdge($id, $method_call.id);
+	$id = PrintNode("Call_expr");
+	PrintEdge($id, $method_call.id);
 }
-| '-' e3=expr
+| '(' expr ')'
 {
-    $id = PrintNode("Negative_expr");
-    PrintEdge($id, $e3.id);
-}
-| '!' e4=expr
-{
-    $id = PrintNode("Not_expr");
-    PrintEdge($id, $e4.id);
-}
-| '(' e5=expr ')'
-{
-    $id = PrintNode("Paren_expr");
-    PrintEdge($id, $e5.id);
+	$id = $expr.id;
 }
 ;
-
 
 location returns [int id]
 : Ident '[' expr ']'
@@ -544,4 +629,3 @@ location returns [int id]
 
 int_literal: Num | HexNum;
 literal: int_literal | Char | BoolLit;
-binOp: EqOp | Relop | ArithOp | CondOp;
