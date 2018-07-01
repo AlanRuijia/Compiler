@@ -1,5 +1,4 @@
 grammar Cmpt379Compiler;
-import A1_lexer;
 //---------------------------------------------------------------------------------------------------
 // Session 1: ANTLR tree plotting API, You SHOULD NOT make any modification to this session
 //---------------------------------------------------------------------------------------------------
@@ -91,7 +90,7 @@ import A1_lexer;
 // Syntax Parser Grammar Definition
 //------
 program
-: Class Program OBrace field_decls method_decls CBrace 
+: Class Program '{' field_decls method_decls '}' 
 {
     int id = PrintNode("Program");
     if ($field_decls.s.size > 0) {
@@ -345,11 +344,11 @@ statement returns [int id]
     PrintEdge($id, $expr.id);
     PrintEdge($id, $case_seq.id);
 }
-| While '(' expr ')' statement
+| While '(' expr ')' s=statement
 {
     $id = PrintNode("While");
     PrintEdge($id, $expr.id);
-    PrintEdge($id, $statement.id);
+    PrintEdge($id, $s.id);
 }
 | Ret ';'
 {
@@ -629,3 +628,96 @@ location returns [int id]
 
 int_literal: Num | HexNum;
 literal: int_literal | Char | BoolLit;
+
+// Fragment definition
+
+fragment SingleQuote: '\'';
+
+fragment DoubleQuote: '"';
+
+fragment Digit: [0-9];
+
+fragment Letter: [a-zA-Z];
+
+fragment Alpha: [a-zA-Z_];
+
+fragment AlphaNum: Alpha | Digit;
+
+fragment Delim: ' ' | '\t' | '\n';
+
+fragment Escape: '\\' . ;
+
+fragment HexDigit: Digit | [a-f] | [A-F];
+
+// Lexer defintion
+
+WhiteSpace: Delim+ -> skip;
+
+Char: SingleQuote (Escape|~['\\]) SingleQuote; //'
+
+Str: DoubleQuote (Escape|~["\\])* DoubleQuote;
+
+Class: 'class';
+
+Program: 'Program';
+
+Void: 'void';
+
+If: 'if';
+
+Else: 'else';
+
+For: 'for';
+
+While: 'while';
+
+Ret: 'return';
+
+Brk: 'break';
+
+Cnt: 'continue';
+
+Callout: 'callout';
+
+Switch: 'switch';
+
+Case: 'case';
+
+Num: Digit+;
+
+HexNum: '0x'HexDigit+;
+
+BoolLit: 'true' | 'false';
+
+Type: 'int' | 'boolean';
+
+Ident: Alpha AlphaNum*;
+
+Relop: '<' | '>' | '<=' | '>=';
+
+AssignOp: '=' | '+=' | '-=';
+
+ArithOp: '+' | '-' | '*' | '/' | '%';
+
+CondOp: '&&' | '||';
+
+OParen: '(';
+
+CParen: ')';
+
+OBrace: '{';
+
+CBrace: '}';
+
+OBracket: '[';
+
+CBracket: ']';
+
+SemiColon: ';';
+
+Colon: ':';
+
+Comma: ',';
+
+EqOp: '==' | '!=';
+
