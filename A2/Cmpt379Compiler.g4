@@ -417,6 +417,7 @@ method_call returns [int id]
 | Ident '(' expr_arg next_args ')'
 {
     $id = PrintNode("User_meth");
+	PrintEdge($id, PrintNode($Ident.text));
     PrintEdge($id, $expr_arg.id);
     PrintEdges($id, $next_args.s);
 }
