@@ -30,6 +30,7 @@ package x86;
 			if (size == 0){
 				locs = ll.locs;
 				size = ll.size;
+				return;
 			}
 			for (int i = 0; i < ll.size; i++) {
 				locs[size] = ll.locs[i];
