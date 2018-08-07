@@ -210,9 +210,11 @@ statements returns [LocList nextlist, LocList brklist, LocList cntlist, LocList 
 : t=statements marker statement
 {
 	$t.nextlist.BackPatch(q, $marker.label);
+	$t.brklist.BackPatch(q, $marker.label);
 	$nextlist = $statement.nextlist;
-	$brklist = $t.brklist;
-	$brklist.Merge ($statement.brklist);
+	// $brklist = $t.brklist;
+	// $brklist.Merge ($statement.brklist);
+	$brklist = $statement.brklist;
 	$cntlist = $t.cntlist;
 	$cntlist.Merge ($statement.cntlist);	
 
