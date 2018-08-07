@@ -214,7 +214,7 @@ statements returns [LocList nextlist, LocList brklist, LocList cntlist, LocList 
 	$nextlist = $statement.nextlist;
 	$brklist = $t.brklist;
 	$brklist.Merge ($statement.brklist);
-	$brklist = $statement.brklist;
+	// $brklist = $statement.brklist;
 	$cntlist = $t.cntlist;
 	$cntlist.Merge ($statement.cntlist);	
 
@@ -312,8 +312,9 @@ stat=statement
     $stat.nextlist.BackPatch(q, $m1.label);
     q.Add($m1.label, null, null, "goto");
     $stat.cntlist.BackPatch(q, $m1.label);
-    $brklist = $stat.brklist;
+    $stat.brklist.BackPatch(q, s.Add(q.GetNextLabel()));
 
+	$brklist = new LocList();
     $cntlist = new LocList ();
 	$retList = new LocList ();
 }
