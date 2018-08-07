@@ -109,9 +109,9 @@ package x86;
 				System.out.println("call " + src1.GetName());
 				System.out.println("mov %rax, " + dst.AsmPrint());
 			} else if (op.equals("push %rdi")) {
-				System.out.println("mov %rdi " + dst.AsmPrint());
+				System.out.println("mov %rdi, " + dst.AsmPrint());
 			} else if (op.equals("push %rsi")) {
-				System.out.println("mov %rsi " + dst.AsmPrint());
+				System.out.println("mov %rsi, " + dst.AsmPrint());
 			}
 		}
 

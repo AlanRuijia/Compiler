@@ -159,7 +159,7 @@ params returns [int count]
 	Symbol sym = s.Add($Ident.text, t);
 
 	$count = 1;
-	q.Add (null, null, null, "push %rdi");
+	q.Add (sym, null, null, "push %rdi");
 }
 |
 {
