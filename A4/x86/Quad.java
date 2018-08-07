@@ -43,7 +43,6 @@ package x86;
 		}
 
 		public void AsmPrint () {
-			System.out.println("#### op: " + op);
 			System.out.print(label.GetName() + ": ");
 			
 			if (op.equals("")) { //label
@@ -77,8 +76,15 @@ package x86;
 			} else if (op.equals("/")) {
 				ReadSrc1(src1);
 				ReadSrc2(src2);
-				Compute("idiv");
+				System.out.println("mov $0, %rdx");
+				System.out.println("idiv %rbx");
 				WriteDst(dst);
+			} else if (op.equals("%")) {
+				ReadSrc1(src1);
+				ReadSrc2(src2);
+				System.out.println("mov $0, %rdx");
+				System.out.println("idiv %rbx");
+				System.out.println("mov %rdx, " + dst.AsmPrint());
 			} else if (op.equals("-") && src2 == null) {
 				ReadSrc1(src1);
 				SingleCompute("neg");
@@ -112,6 +118,14 @@ package x86;
 				System.out.println("mov %rdi, " + dst.AsmPrint());
 			} else if (op.equals("push %rsi")) {
 				System.out.println("mov %rsi, " + dst.AsmPrint());
+			} else if (op.equals("push %rdx")) {
+				System.out.println("mov %rdx, " + dst.AsmPrint());
+			} else if (op.equals("push %rcx")) {
+				System.out.println("mov %rcx, " + dst.AsmPrint());
+			} else if (op.equals("push %r8")) {
+				System.out.println("mov %r8, " + dst.AsmPrint());
+			} else if (op.equals("push %r9")) {
+				System.out.println("mov %r9, " + dst.AsmPrint());
 			}
 		}
 
