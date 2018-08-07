@@ -72,12 +72,12 @@ package x86;
 			} else if (op.equals("*")) {
 				ReadSrc1(src1);
 				ReadSrc2(src2);
-				Compute("mul");
+				Compute("imul");
 				WriteDst(dst);
 			} else if (op.equals("/")) {
 				ReadSrc1(src1);
 				ReadSrc2(src2);
-				Compute("div");
+				Compute("idiv");
 				WriteDst(dst);
 			} else if (op.equals("-") && src2 == null) {
 				ReadSrc1(src1);
@@ -86,12 +86,12 @@ package x86;
 			} else if (op.equals("=[]")) {
 				ReadSrc1(src1);
 				ReadSrc2(src2);
-				System.out.println("movq " + "(%rax, %rbx, 8), " + dst.AsmPrint()); // may need further implementation
+				System.out.println("add %rbx, %rax");
+				System.out.println("movq %rax, " + dst.AsmPrint()); // may need further implementation
 			} else if (op.equals("[]=")) {
 				ReadSrc1(src1);
 				ReadSrc2(src2);
-				System.out.println("movq %rbx, (" + dst.AsmPrint() + ", %rax, 8)");
-				// System.out.println("movq (" + dst.AsmPrint() + ", %rax, 8), %rbx"); // may need further implementation
+				System.out.println("movq %rbx, ("+ dst.AsmPrint() + ", %rax, 1)");
 			} else if (op.equals("goto")) {
 				System.out.println("jmp " + dst.AsmPrint());
 			} else if (op.equals("cmp")) {
@@ -106,8 +106,10 @@ package x86;
 				System.out.println("jg " + dst.AsmPrint());
 			} else if (op.equals("call")) {
 				System.out.println("call " + src1.GetName());
-			} else if (op.equals("rdi")) {
+			} else if (op.equals("rdi") || op.equals("rsi") || op.equals("rdx") || op.equals("rcx") || op.equals("r8") || op.equals("r9")) {
 				System.out.println("mov " + dst.AsmPrint() + ", %" + op); 
+			} else if (op.equals("callexp")) {
+
 			}
 		}
 
