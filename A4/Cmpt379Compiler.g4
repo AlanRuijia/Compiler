@@ -138,17 +138,17 @@ params returns [int count]
 
 	$count = $p.count + 1;
 	switch ($count) {
-		case 1: q.Add (null, null, null, "push %rdi");
+		case 1: q.Add ($sym, null, null, "push %rdi");
 				break;
-		case 2: q.Add (null, null, null, "push %rsi");
+		case 2: q.Add ($sym, null, null, "push %rsi");
 				break;
-		case 3: q.Add (null, null, null, "push %rdx");
+		case 3: q.Add ($sym, null, null, "push %rdx");
 				break;
-		case 4: q.Add (null, null, null, "push %rcx");
+		case 4: q.Add ($sym, null, null, "push %rcx");
 				break;
-		case 5: q.Add (null, null, null, "push %r8");
+		case 5: q.Add ($sym, null, null, "push %r8");
 				break;
-		case 6: q.Add (null, null, null, "push %r9");
+		case 6: q.Add ($sym, null, null, "push %r9");
 				break;
 	}	
 
