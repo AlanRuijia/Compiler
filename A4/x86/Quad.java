@@ -99,20 +99,15 @@ package x86;
 				ReadSrc1(src1);
 				ReadSrc2(src2);
 				System.out.println("cmp %rax, %rbx");
-			} else if (op.equals("jle")) {
-				System.out.println("jle " + dst.AsmPrint());
-			} else if (op.equals("jl")) {
-				System.out.println("jl " + dst.AsmPrint());
-			} else if (op.equals("jge")) {
-				System.out.println("jge " + dst.AsmPrint());
-			} else if (op.equals("jg")) {
-				System.out.println("jg " + dst.AsmPrint());
+			} else if (op.equals("jle") || op.equals("jl") || op.equals("jge") || op.equals("jg") || op.equals("je") || op.equals("jne")) {
+				System.out.println(op + " " + dst.AsmPrint());
 			} else if (op.equals("call")) {
 				System.out.println("call " + src1.GetName());
 			} else if (op.equals("rdi") || op.equals("rsi") || op.equals("rdx") || op.equals("rcx") || op.equals("r8") || op.equals("r9")) {
 				System.out.println("mov " + dst.AsmPrint() + ", %" + op); 
 			} else if (op.equals("callexp")) {
-
+				System.out.println("call " + src1.GetName());
+				System.out.println("mov %rax, " + dst.AsmPrint());
 			}
 		}
 
