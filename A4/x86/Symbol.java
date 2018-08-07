@@ -121,7 +121,9 @@ package x86;
 
 		public String AsmPrint () {
 			if (isConst || isGlobal) {
-				if ((dt == DataType.LABEL) || (isConst) || (arrSize != 0)) return ("$" + GetName());
+				if (dt == DataType.LABEL)
+					return (GetName());
+				if ((dt != DataType.LABEL) || (isConst) || (arrSize != 0)) return ("$" + GetName());
 				else return (GetName());
 			}
 			else if (dt == DataType.STR) return ("$str" + GetOffset());

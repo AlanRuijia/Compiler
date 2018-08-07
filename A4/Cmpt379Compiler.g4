@@ -293,7 +293,7 @@ statement returns [LocList nextlist, LocList brklist, LocList cntlist, LocList r
 	$retList = $b1.retList;
 	$retList.Merge ($b2.retList);
 }
-// | Switch expr {int temp = $expr.id;} '{' cases[temp] '}' m1=marker
+// | Switch expr {Symbol temp = $expr.sym;} '{' cases[temp] '}' m1=marker
 // {
 //     // q.BackPatch($cases.brklist);
 //     $cases.brklist.BackPatch(q, $m1.label);
@@ -303,17 +303,17 @@ statement returns [LocList nextlist, LocList brklist, LocList cntlist, LocList r
 | While m1=marker '(' expr ')' m2=marker
 {
     $nextlist = $expr.falselist;
-    // q.BackPatch($expr.truelist);
     $expr.truelist.BackPatch(q, $m2.label);
 } 
 stat=statement
 {
-    // q.BackPatch($stat.nextlist, m1);
     $stat.nextlist.BackPatch(q, $m1.label);
     q.Add($m1.label, null, null, "goto");
-    // q.BackPatch($stat.cntlist, m1);
     $stat.cntlist.BackPatch(q, $m1.label);
     $brklist = $stat.brklist;
+
+    $cntlist = new LocList ();
+	$retList = new LocList ();
 }
 | Brk ';'
 {
@@ -370,12 +370,15 @@ stat=statement
 }
 ;
 
-// cases[int eid] returns [int[] nextlist, int[] cntlist, int[] brklist]
+// cases[Symbol eid] returns [LocList nextlist, LocList cntlist, LocList brklist]
 // : case_sample[eid] c=cases[eid]
 // {
-//     $nextlist = Merge($c.nextlist, $case_sample.nextlist);
-//     $cntlist = Merge($c.cntlist, $case_sample.cntlist);
-//     $brklist = Merge($c.brklist, $case_sample.brklist);
+//     $nextlist.Merge($c.nextlist);
+//     $nextlist.Merge($case_sample.nextlist);
+//     $cntlist.Merge($c.cntlist);
+//     $cntlist.Merge($case_sample.cntlist);
+//     $brklist.Merge($c.brklist);
+//     $brklist.Merge($case_sample.brklist);
 // }
 // | case_sample[eid]
 // {
@@ -386,15 +389,15 @@ stat=statement
 // |
 // ;
 
-// case_sample[int eid] returns [LocList nextlist, LocList cntlist, LocList brklist]
+// case_sample[Symbol eid] returns [LocList nextlist, LocList cntlist, LocList brklist]
 // : Case literal
 // {
-//     int tid = s.Insert(DataType.BOOLEAN);
-//     q.Add(tid, $literal.id, eid, "==");
-//     int[] truelist = q.MakeList();
-//     q.Add(tid, -1, -1, "if");
+//     Symbol t = s.Insert(DataType.BOOLEAN);
+//     q.Add(t, $literal.sym, eid, "==");
+//     LocList truelist = new LocList ();
+//     q.Add(t, -1, -1, "if");
 //     int[] falselist = q.MakeList();
-//     q.Add(tid, -1, -1, "ifElse");
+//     q.Add(t, -1, -1, "ifElse");
 //     q.BackPatch(truelist);
 // }
 //  ':' statements
@@ -765,7 +768,9 @@ Str
 :'"' ((~('\\' | '"')) | ('\\'.))* '"'
 ; 
 
-
+While
+: 'while'
+;
 
 Class
 : 'class'

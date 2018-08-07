@@ -23,6 +23,16 @@ package x86;
 		}
 
 		public void Merge (LocList ll) {
+			
+			if (ll.size == 0){
+				System.out.println("In merge1.....");
+				return;
+			}
+			if (size == 0){
+				System.out.println("In merge2.....");
+				locs = ll.locs;
+				size = ll.size;
+			}
 			for (int i = 0; i < ll.size; i++) {
 				locs[size] = ll.locs[i];
 				size ++;
