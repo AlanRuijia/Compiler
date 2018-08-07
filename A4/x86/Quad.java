@@ -91,11 +91,14 @@ package x86;
 			} else if (op.equals("[]=")) {
 				ReadSrc1(src1);
 				ReadSrc2(src2);
-				System.out.println("movq %rbx, ("+ dst.AsmPrint() + ", %rax, 1)");
+				ReadDst(dst);
+				System.out.println("movq %rbx, (%r10, %rax, 1)");
 			} else if (op.equals("goto")) {
 				System.out.println("jmp " + dst.AsmPrint());
 			} else if (op.equals("cmp")) {
-				System.out.println("cmp " + src1.AsmPrint() + ", " + src2.AsmPrint());
+				ReadSrc1(src1);
+				ReadSrc2(src2);
+				System.out.println("cmp %rax, %rbx");
 			} else if (op.equals("jle")) {
 				System.out.println("jle " + dst.AsmPrint());
 			} else if (op.equals("jl")) {
@@ -127,6 +130,10 @@ package x86;
 
 		void ReadSrc2 (Symbol src) {
 			System.out.println("mov " + src.AsmPrint() + ", %rbx");
+		}
+
+		void ReadDst(Symbol dst) {
+			System.out.println("mov " + dst.AsmPrint() + ", %r10");
 		}
 
 		void WriteDst (Symbol dst) {
