@@ -301,7 +301,7 @@ statement returns [LocList nextlist, LocList brklist, LocList cntlist, LocList r
 //     $cases.brklist.BackPatch(q, $m1.label);
 //     $nextlist = $cases.nextlist;
 //     $cntlist = $cases.cntlist;
-// }
+// } will do
 
 | While m1=marker '(' expr ')' m2=marker
 {
