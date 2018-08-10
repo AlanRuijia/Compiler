@@ -1,4 +1,6 @@
 grammar Cmpt379Compiler;
+
+
 @header {
 
 import x86.*;
@@ -6,17 +8,32 @@ import java.io.*;
 
 }
 
+
+
 @parser::members {
 
+
+
+
+
+
+
+	
+
 	SymStack s = new SymStack();
+
 	QuadTab q = new QuadTab(s);
 
+
 }
+
+
+
 
 //---------------------------------------------------------------------------------------------------
 
 
-program
+prog
 : Class Program '{' field_decls
 {
 	s.BlockEntry();
@@ -25,10 +42,13 @@ method_decls '}'
 {
 	s.Print();
 	//print global variables
+	
+
 	System.out.println(".globl main");
 	System.out.println(".data");
 	s.PrintGlobals();
 	System.out.println(".text");
+
 	q.AsmPrint();
 }
 ;
@@ -70,7 +90,7 @@ inited_field_decl
 	DataType t = DataType.valueOf($Type.text.toUpperCase());
 	Symbol src1 = s.insert($literal.text, t, Boolean.TRUE);
 	Symbol dst = s.Add($Ident.text, t, src1);
-	q.Add(dst, src1, null, "="); // Originally commented out 
+	//q.Add(dst, src1, null, "=");
 }
 ;
 
@@ -138,17 +158,17 @@ params returns [int count]
 
 	$count = $p.count + 1;
 	switch ($count) {
-		case 1: q.Add (sym, null, null, "push %rdi");
+		case 1: q.Add (null, null, null, "push %rdi");
 				break;
-		case 2: q.Add (sym, null, null, "push %rsi");
+		case 2: q.Add (null, null, null, "push %rsi");
 				break;
-		case 3: q.Add (sym, null, null, "push %rdx");
+		case 3: q.Add (null, null, null, "push %rdx");
 				break;
-		case 4: q.Add (sym, null, null, "push %rcx");
+		case 4: q.Add (null, null, null, "push %rcx");
 				break;
-		case 5: q.Add (sym, null, null, "push %r8");
+		case 5: q.Add (null, null, null, "push %r8");
 				break;
-		case 6: q.Add (sym, null, null, "push %r9");
+		case 6: q.Add (null, null, null, "push %r9");
 				break;
 	}	
 
@@ -159,7 +179,7 @@ params returns [int count]
 	Symbol sym = s.Add($Ident.text, t);
 
 	$count = 1;
-	q.Add (sym, null, null, "push %rdi");
+	q.Add (null, null, null, "push %rdi");
 }
 |
 {
@@ -210,11 +230,9 @@ statements returns [LocList nextlist, LocList brklist, LocList cntlist, LocList 
 : t=statements marker statement
 {
 	$t.nextlist.BackPatch(q, $marker.label);
-	// $t.brklist.BackPatch(q, $marker.label);
 	$nextlist = $statement.nextlist;
 	$brklist = $t.brklist;
 	$brklist.Merge ($statement.brklist);
-	// $brklist = $statement.brklist;
 	$cntlist = $t.cntlist;
 	$cntlist.Merge ($statement.cntlist);	
 
@@ -237,7 +255,7 @@ statement returns [LocList nextlist, LocList brklist, LocList cntlist, LocList r
 {
 	if ($eqOp.text.equals("+=")) {
 		Symbol sym1 = s.Add($location.base.GetType());
-		if ($location.offset != null) q.Add(sym1, $location.base, $location.offset, "=[]");
+		if ($location.offset != null) q.Add(sym1, $location.base, $location.offset, "[]=");
 		else q.Add(sym1, $location.base, null, "=");
 		Symbol sym2 = s.Add($location.base.GetType());
 		q.Add(sym2, sym1, $expr.sym, "+");
@@ -248,7 +266,7 @@ statement returns [LocList nextlist, LocList brklist, LocList cntlist, LocList r
 		}
 	} else if ($eqOp.text.equals("-=")) {
 		Symbol sym1 = s.Add($location.base.GetType());
-		if ($location.offset != null) q.Add(sym1, $location.base, $location.offset, "=[]");
+		if ($location.offset != null) q.Add(sym1, $location.base, $location.offset, "[]=");
 		else q.Add(sym1, $location.base, null, "=");
 		Symbol sym2 = s.Add($location.base.GetType());
 		q.Add(sym2, sym1, $expr.sym, "-");
@@ -294,30 +312,6 @@ statement returns [LocList nextlist, LocList brklist, LocList cntlist, LocList r
 	$cntlist.Merge ($b2.brklist);
 	$retList = $b1.retList;
 	$retList.Merge ($b2.retList);
-}
-// | Switch expr {Symbol temp = $expr.sym;} '{' cases[temp] '}' m1=marker
-// {
-//     // q.BackPatch($cases.brklist);
-//     $cases.brklist.BackPatch(q, $m1.label);
-//     $nextlist = $cases.nextlist;
-//     $cntlist = $cases.cntlist;
-// }
-
-| While m1=marker '(' expr ')' m2=marker
-{
-    $nextlist = $expr.falselist;
-    $expr.truelist.BackPatch(q, $m2.label);
-} 
-stat=statement
-{
-    $stat.nextlist.BackPatch(q, $m1.label);
-    q.Add($m1.label, null, null, "goto");
-    $stat.cntlist.BackPatch(q, $m1.label);
-    $stat.brklist.BackPatch(q, s.Add(q.GetNextLabel()));
-
-	$brklist = new LocList();
-    $cntlist = new LocList ();
-	$retList = new LocList ();
 }
 | Brk ';'
 {
@@ -374,47 +368,6 @@ stat=statement
 }
 ;
 
-// cases[Symbol eid] returns [LocList nextlist, LocList cntlist, LocList brklist]
-// : case_sample[eid] c=cases[eid]
-// {
-//     $nextlist.Merge($c.nextlist);
-//     $nextlist.Merge($case_sample.nextlist);
-//     $cntlist.Merge($c.cntlist);
-//     $cntlist.Merge($case_sample.cntlist);
-//     $brklist.Merge($c.brklist);
-//     $brklist.Merge($case_sample.brklist);
-// }
-// | case_sample[eid]
-// {
-//     $nextlist = $case_sample.nextlist;
-//     $cntlist = $case_sample.cntlist;
-//     $brklist = $case_sample.brklist;
-// }
-// |
-// ;
-
-// case_sample[Symbol eid] returns [LocList nextlist, LocList cntlist, LocList brklist]
-// : Case literal
-// {
-//     Symbol t = s.Insert(DataType.BOOLEAN);
-//     q.Add(t, $literal.sym, eid, "==");
-//     LocList truelist = new LocList ();
-//     q.Add(t, -1, -1, "if");
-//     int[] falselist = q.MakeList();
-//     q.Add(t, -1, -1, "ifElse");
-//     q.BackPatch(truelist);
-// }
-//  ':' statements
-//  {
-//     q.BackPatch(falselist);
-//     $nextlist = $statements.nextlist;
-//     $cntlist = $statements.cntlist;
-//     $brklist = $statements.brklist;
-//  }
-// |
-// Case literal ':'
-// ;
-
 expr returns [Symbol sym, LocList truelist, LocList falselist]
 : literal
 {
@@ -424,7 +377,7 @@ expr returns [Symbol sym, LocList truelist, LocList falselist]
 {
 	if ($location.offset != null) {
 		$sym = s.Add($location.base.GetType());
-		q.Add($sym, $location.base, $location.offset, "=[]");
+		q.Add($sym, $location.base, $location.offset, "[]");
 	} else {
 		$sym = $location.base;
 	}
@@ -772,9 +725,7 @@ Str
 :'"' ((~('\\' | '"')) | ('\\'.))* '"'
 ; 
 
-While
-: 'while'
-;
+
 
 Class
 : 'class'
@@ -854,3 +805,16 @@ AddSub
 : '+'
 | '-'
 ;
+
+
+
+
+
+
+
+
+
+
+
+
+

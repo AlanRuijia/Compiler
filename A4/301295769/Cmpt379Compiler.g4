@@ -302,7 +302,6 @@ statement returns [LocList nextlist, LocList brklist, LocList cntlist, LocList r
 //     $nextlist = $cases.nextlist;
 //     $cntlist = $cases.cntlist;
 // }
-
 | While m1=marker '(' expr ')' m2=marker
 {
     $nextlist = $expr.falselist;
