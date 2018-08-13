@@ -295,14 +295,12 @@ statement returns [LocList nextlist, LocList brklist, LocList cntlist, LocList r
 	$retList = $b1.retList;
 	$retList.Merge ($b2.retList);
 }
-// | Switch expr {Symbol temp = $expr.sym;} '{' cases[temp] '}' m1=marker
-// {
-//     // q.BackPatch($cases.brklist);
-//     $cases.brklist.BackPatch(q, $m1.label);
-//     $nextlist = $cases.nextlist;
-//     $cntlist = $cases.cntlist;
-// } will do
-
+| Switch expr { Symbol temp = $expr.sym; } '{' cases[temp] '}' m1=marker
+{
+    $cases.brklist.BackPatch(q, $m1.label);
+    $nextlist = $cases.nextlist;
+    $cntlist = $cases.cntlist;
+}
 | While m1=marker '(' expr ')' m2=marker
 {
     $nextlist = $expr.falselist;
@@ -374,46 +372,48 @@ stat=statement
 }
 ;
 
-// cases[Symbol eid] returns [LocList nextlist, LocList cntlist, LocList brklist]
-// : case_sample[eid] c=cases[eid]
-// {
-//     $nextlist.Merge($c.nextlist);
-//     $nextlist.Merge($case_sample.nextlist);
-//     $cntlist.Merge($c.cntlist);
-//     $cntlist.Merge($case_sample.cntlist);
-//     $brklist.Merge($c.brklist);
-//     $brklist.Merge($case_sample.brklist);
-// }
-// | case_sample[eid]
-// {
-//     $nextlist = $case_sample.nextlist;
-//     $cntlist = $case_sample.cntlist;
-//     $brklist = $case_sample.brklist;
-// }
-// |
-// ;
+cases[Symbol eid] returns [LocList nextlist, LocList cntlist, LocList brklist]
+: case_sample[eid] m1=marker c=cases[eid]
+{
+    $nextlist = new LocList();
+	$case_sample.nextlist.BackPatch(q, $m1.label);
+	$cntlist = new LocList();
+    $cntlist.Merge($c.cntlist);
+    $cntlist.Merge($case_sample.cntlist);
+	$brklist = new LocList();
+    $brklist.Merge($c.brklist);
+    $brklist.Merge($case_sample.brklist);
+}
+| case_sample[eid] m1=marker
+{
+    $case_sample.nextlist.BackPatch(q, $m1.label);
+    $cntlist = $case_sample.cntlist;
+    $brklist = $case_sample.brklist;
+}
+|
+;
 
-// case_sample[Symbol eid] returns [LocList nextlist, LocList cntlist, LocList brklist]
-// : Case literal
-// {
-//     Symbol t = s.Insert(DataType.BOOLEAN);
-//     q.Add(t, $literal.sym, eid, "==");
-//     LocList truelist = new LocList ();
-//     q.Add(t, -1, -1, "if");
-//     int[] falselist = q.MakeList();
-//     q.Add(t, -1, -1, "ifElse");
-//     q.BackPatch(truelist);
-// }
-//  ':' statements
-//  {
-//     q.BackPatch(falselist);
-//     $nextlist = $statements.nextlist;
-//     $cntlist = $statements.cntlist;
-//     $brklist = $statements.brklist;
-//  }
-// |
-// Case literal ':'
-// ;
+case_sample[Symbol eid] returns [LocList nextlist, LocList cntlist, LocList brklist]
+: Case literal m1=marker 
+{
+	Symbol t = s.insert($eid.GetName() + $literal.sym.GetName(), DataType.BOOLEAN);
+    q.Add(t, $literal.sym, eid, "cmp");
+    LocList truelist = new LocList ();
+    truelist.Add(q.Add(null, t, null, "je"));
+    LocList falselist = new LocList ();
+    falselist.Add(q.Add(null, t, null, "jne"));
+	truelist.BackPatch(q, $m1.label);
+}
+':' statements
+ {  
+	$nextlist = $statements.nextlist;
+	$nextlist.Merge(falselist);
+    $cntlist = $statements.cntlist;
+    $brklist = $statements.brklist;
+ }
+|
+Case literal ':'
+;
 
 expr returns [Symbol sym, LocList truelist, LocList falselist]
 : literal
@@ -774,6 +774,14 @@ Str
 
 While
 : 'while'
+;
+
+Switch
+: 'switch'
+;
+
+Case
+: 'case'
 ;
 
 Class

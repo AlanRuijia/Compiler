@@ -23,7 +23,8 @@ package x86;
 		}
 
 		public void Merge (LocList ll) {
-			
+			if (ll == null)
+				return;
 			if (ll.size == 0){
 				return;
 			}
