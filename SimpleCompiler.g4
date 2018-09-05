@@ -1,4 +1,4 @@
-grammar Cmpt379Compiler;
+grammar SimpleCompiler;
 @header {
 
 import x86.*;
