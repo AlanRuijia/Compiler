@@ -4,7 +4,7 @@
 
 * make
 
-* grun Cmpt379Compiler program <path to test case> > test.s
+* grun SimpleCompiler program <path to test case> > test.s
 
 * gcc -s test.s 
 
