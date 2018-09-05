@@ -29,4 +29,4 @@ $(X86_CLASSES):
 	$(JC) $(JFAGS) $(X86_SRCS) -d $(OUTPUT)
 
 clean:
-	-rm -r *.class *.java *.tokens test*.png ./x86/*.class
+	-rm -r *.class *.java *.tokens test*.png ./x86/*.class *.interp
