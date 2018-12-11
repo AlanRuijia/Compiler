@@ -1,4 +1,4 @@
-### This is a C-like compiler implemented by Antlr, which counts for the final course project of CMPT379 in SFU.
+### This is a C-like compiler implemented by Antlr.
 
 ### How to use:
 
